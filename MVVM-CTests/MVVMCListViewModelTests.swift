@@ -26,26 +26,24 @@ class MVVMCListViewModelTests: XCTestCase {
         let vm = MVVMCListViewModel()
         XCTAssertEqual(0,vm.numberOfItems)
         XCTAssertEqual("List", vm.title)
-        XCTAssertNil(vm.viewDelegate)
         XCTAssertNil(vm.model)
-        XCTAssertNil(vm.coordinatorDelegate)
+        XCTAssertNil(vm.didChange)
+        XCTAssertNil(vm.didSelectDataItem)
     }
+
     
     func testNumberOfItems() {
         let vm = MVVMCListViewModel()
         
         // We can test with the actual app model as it produces hard coded data
         // In normal testing we would create a ListModel implementation with fix test data to use,
-        vm.model = MVVMCListModel()
+        vm.model = TestableMVVMCListModel()
         XCTAssertEqual(7, vm.numberOfItems)
     }
     
     func testItemAtIndex() {
         let vm = MVVMCListViewModel()
-        
-        // We can test with the actual app model as it produces hard coded data
-        // In normal testing we would create a ListModel implementation with fix test data to use,
-        vm.model = MVVMCListModel()
+        vm.model = TestableMVVMCListModel()
         
         // Test a value from the start, end, and middle of list
         
@@ -88,10 +86,7 @@ class MVVMCListViewModelTests: XCTestCase {
     
     func testItemAtIndexWithInvalidIndex() {
         let vm = MVVMCListViewModel()
-        
-        // We can test with the actual app model as it produces hard coded data
-        // In normal testing we would create a ListModel implementation with fixed test data to use,
-        vm.model = MVVMCListModel()
+        vm.model = TestableMVVMCListModel()
         
         // Test a value from beyond the end of the list
         let dataItem = vm.itemAt(index: vm.numberOfItems + 1)
@@ -100,25 +95,18 @@ class MVVMCListViewModelTests: XCTestCase {
     
     func testUseItemAtIndex() {
         let vm = MVVMCListViewModel()
+        vm.model = TestableMVVMCListModel()
         
-        // We can test with the actual app model as it produces hard coded data
-        // In normal testing we would create a ListModel implementation with fixed test data to use,
-        vm.model = MVVMCListModel()
-        vm.coordinatorDelegate = self
+        vm.didSelectDataItem = { [weak self] dataItem in
+            XCTAssertEqual("Pavel Chekov", dataItem.name)
+            XCTAssertEqual("Ensign", dataItem.role)
+            self?.currentExpectation?.fulfill()
+        }
         currentExpectation =  expectation(description: "testUseItemAtIndex")
         vm.useItemAt(index: 6)
         
         waitForExpectations(timeout: 1) { error in
-            vm.coordinatorDelegate = nil
+            vm.didSelectDataItem = nil
         }
-    }
-}
-
-
-extension MVVMCListViewModelTests: ListViewModelCoordinatorDelegate {
-    func listDidSelectDataFor(viewModel: ListViewModel, data: DataItem) {
-        XCTAssertEqual("Pavel Chekov", data.name)
-        XCTAssertEqual("Ensign", data.role)
-        currentExpectation?.fulfill()
     }
 }

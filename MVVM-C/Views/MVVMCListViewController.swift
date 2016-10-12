@@ -11,11 +11,7 @@ import UIKit
 class MVVMCListViewController: UITableViewController {
     
     var viewModel: ListViewModel? {
-        willSet {
-            viewModel?.viewDelegate = nil
-        }
         didSet {
-            viewModel?.viewDelegate = self
             refreshDisplay()
         }
     }
@@ -35,10 +31,25 @@ class MVVMCListViewController: UITableViewController {
         super.viewDidLoad()
         tableView.contentInset = UIEdgeInsetsMake(20, 0, 0, 0)
         
+        self.title = self.viewModel?.title ?? ""
+        self.bindToViewModel()
+        
         isLoaded = true
         refreshDisplay();
     }
+ 
+    private func bindToViewModel() {
+        self.viewModel?.didChange = { [weak self] _ in
+            self?.tableView.reloadData()
+        }
+//        self.viewModel.didError = { [weak self] error in
+//            self?.viewModelDidError(error)
+//        }
+    }
     
+//    private func viewModelDidError(error: Error) {
+//        UIAlertView(title: "Error", message: error.displayString(), delegate: nil, cancelButtonTitle: "OK").show()
+//    }
 }
 
 extension MVVMCListViewController {
@@ -62,11 +73,5 @@ extension MVVMCListViewController {
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         viewModel?.useItemAt(index: (indexPath as NSIndexPath).row)
-    }
-}
-
-extension MVVMCListViewController: ListViewModelViewDelegate {
-    func itemsDidChangeFor(viewModel: ListViewModel) {
-        tableView.reloadData()
     }
 }

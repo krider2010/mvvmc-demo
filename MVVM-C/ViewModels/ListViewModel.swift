@@ -8,18 +8,12 @@
 
 import Foundation
 
-protocol ListViewModelViewDelegate: class {
-    func itemsDidChangeFor(viewModel: ListViewModel)
-}
-
-protocol ListViewModelCoordinatorDelegate: class {
-    func listDidSelectDataFor(viewModel: ListViewModel, data: DataItem)
-}
-
 protocol ListViewModel {
+    
+    var didChange: ((ListViewModel) -> Void)? { get set }
+    var didSelectDataItem: ((DataItem) -> Void)? { get set }
+    
     var model: ListModel? { get set }
-    var viewDelegate: ListViewModelViewDelegate? { get set }
-    var coordinatorDelegate: ListViewModelCoordinatorDelegate? { get set }
     
     var title: String { get }
     

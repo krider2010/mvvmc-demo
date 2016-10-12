@@ -31,17 +31,14 @@ class ListCoordinator: Coordinator {
         
         let viewModel =  MVVMCListViewModel()
         viewModel.model = MVVMCListModel()
-        viewModel.coordinatorDelegate = self
+        viewModel.didSelectDataItem = { [weak self] dataItem in
+            guard let `self` = self else { return }
+            self.detailCoordinator = DetailCoordinator(window: self.window, dataItem: dataItem)
+            self.detailCoordinator?.delegate = self
+            self.detailCoordinator?.start()
+        }
         listViewController.viewModel = viewModel
         window.rootViewController = listViewController
-    }
-}
-
-extension ListCoordinator: ListViewModelCoordinatorDelegate {
-    func listDidSelectDataFor(viewModel: ListViewModel, data: DataItem) {
-        detailCoordinator = DetailCoordinator(window: window, dataItem: data)
-        detailCoordinator?.delegate = self
-        detailCoordinator?.start()
     }
 }
 
